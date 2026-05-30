@@ -1,0 +1,502 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body {
+  background: #0a0a0f;
+  color: #f4f4f5;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* === Base interaction polish === */
+@layer base {
+  button,
+  a,
+  [role="button"],
+  input,
+  textarea,
+  select,
+  label {
+    -webkit-tap-highlight-color: transparent;
+  }
+  button,
+  a[role="button"],
+  [role="button"] {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    outline: 2px solid #ffd23f;
+    outline-offset: 2px;
+    border-radius: 3px;
+  }
+}
+
+/* === Reusable arcade components === */
+@layer components {
+  /* ── CARDS ──────────────────────────────────── */
+  .arcade-card {
+    @apply relative rounded border border-arcade-border bg-arcade-panel;
+  }
+  .arcade-card-feature {
+    @apply arcade-card border-2 border-arcade-accent shadow-arcade-glow;
+  }
+  .arcade-card-tap {
+    @apply arcade-card transition duration-150 ease-out;
+  }
+  .arcade-card-tap:hover {
+    @apply border-arcade-accent/70 shadow-arcade-card-hover;
+  }
+  .arcade-card-tap:active {
+    transform: translateY(1px) scale(0.997);
+    transition-duration: 80ms;
+  }
+
+  /* ── STAT BOX (카드 안쪽 작은 칸) ────────────── */
+  .arcade-stat {
+    @apply rounded border border-arcade-border bg-arcade-bg/60 px-3 py-2;
+  }
+
+  /* ── LABEL (캡스 트래킹 캡션) ───────────────── */
+  .arcade-label {
+    @apply text-[9px] uppercase tracking-arcade text-zinc-500;
+  }
+  .arcade-label-wide {
+    @apply text-[9px] uppercase tracking-arcade-wide text-zinc-500;
+  }
+
+  /* ── DIVIDER ────────────────────────────────── */
+  .arcade-divider {
+    @apply mx-auto h-px w-full bg-gradient-to-r from-transparent via-arcade-border to-transparent;
+  }
+  .arcade-divider-accent {
+    @apply mx-auto h-px w-full bg-gradient-to-r from-transparent via-arcade-accent to-transparent;
+  }
+
+  /* ── BUTTONS ────────────────────────────────── */
+  .arcade-btn {
+    @apply relative inline-flex select-none items-center justify-center overflow-hidden transition duration-150 ease-out;
+  }
+  .arcade-btn:active {
+    transform: translateY(1px);
+    filter: brightness(0.96);
+    transition-duration: 70ms;
+  }
+  .arcade-btn:disabled,
+  .arcade-btn[aria-disabled="true"] {
+    @apply pointer-events-none opacity-50;
+  }
+
+  .arcade-btn-primary {
+    @apply arcade-btn rounded border-2 border-arcade-accent bg-arcade-accent font-bold text-arcade-bg shadow-arcade-glow;
+  }
+  .arcade-btn-primary:hover {
+    @apply shadow-arcade-glow-lg;
+  }
+  .arcade-btn-primary::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      115deg,
+      transparent 35%,
+      rgba(255, 255, 255, 0.28) 50%,
+      transparent 65%
+    );
+    transform: translateX(-110%);
+    transition: transform 0.55s ease;
+  }
+  .arcade-btn-primary:hover::before {
+    transform: translateX(110%);
+  }
+
+  .arcade-btn-ghost {
+    @apply arcade-btn rounded border border-arcade-border bg-arcade-panel text-zinc-200;
+  }
+  .arcade-btn-ghost:hover {
+    @apply border-arcade-accent text-arcade-accent shadow-arcade-glow-sm;
+  }
+
+  .arcade-btn-neon {
+    @apply arcade-btn rounded border border-arcade-neon bg-arcade-panel/90 text-arcade-neon shadow-arcade-glow-neon;
+  }
+  .arcade-btn-neon:hover {
+    @apply shadow-arcade-glow-neon-lg;
+  }
+
+  /* ── CHIP / BADGE ───────────────────────────── */
+  .arcade-chip {
+    @apply inline-flex select-none items-center rounded border px-1.5 py-0.5 text-[9px] font-bold tracking-arcade transition;
+  }
+
+  /* ── INPUT (form fields) ────────────────────── */
+  .arcade-input {
+    @apply w-full rounded border border-arcade-border bg-arcade-panel px-3 py-2 text-sm transition focus:border-arcade-accent focus:shadow-arcade-glow-sm focus:outline-none;
+  }
+}
+
+/* === Utilities === */
+@layer utilities {
+  .arcade-fade-in {
+    animation: arcade-fade-in 0.25s ease-out both;
+  }
+  .arcade-press {
+    @apply transition duration-100 ease-out active:translate-y-px active:brightness-95;
+  }
+}
+
+@keyframes arcade-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* 오락실 점수판 느낌 */
+.arcade-title {
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 8px rgba(255, 210, 63, 0.4);
+}
+
+.arcade-rank-1 { color: #ffd23f; }
+.arcade-rank-2 { color: #d6d6d6; }
+.arcade-rank-3 { color: #cd7f32; }
+
+/* === Map markers — 월드맵 오브젝트 (mini neon object) === */
+.gj-marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  transform-origin: bottom center;
+  /* 살짝 바운싱 — selected 시만 의미 있음 */
+  transition: transform 0.24s cubic-bezier(0.34, 1.4, 0.64, 1), filter 0.18s ease;
+  --tier-color: #ffd23f;
+  --tier-rgb: 255, 210, 63;
+}
+.gj-marker[data-tier="new"] { --tier-color: #39ff14; --tier-rgb: 57, 255, 20; }
+.gj-marker[data-tier="hot"] { --tier-color: #ff3864; --tier-rgb: 255, 56, 100; }
+
+.gj-marker:active { transform: scale(0.95); transition-duration: 80ms; }
+
+/* 코너 칩 — 사각 pill, 그림자 최소화 */
+.gj-marker-chip {
+  position: absolute;
+  top: -7px;
+  right: -9px;
+  z-index: 1;
+  min-width: 16px;
+  padding: 1px 4px;
+  background: rgba(10, 10, 15, 0.92);
+  border: 1px solid var(--tier-color);
+  border-radius: 3px;
+  color: var(--tier-color);
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  line-height: 1.35;
+  white-space: nowrap;
+  box-shadow: 0 0 4px rgba(var(--tier-rgb), 0.35);
+}
+.gj-marker-chip[data-variant="new"] {
+  font-size: 8px;
+  letter-spacing: 0.12em;
+}
+
+/* 아이콘 — 작은 오브젝트 (테두리 반투명, soft glow 1단) */
+.gj-marker-icon {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 10, 15, 0.88);
+  border: 1px solid rgba(var(--tier-rgb), 0.55);
+  border-radius: 4px;
+  color: var(--tier-color);
+  box-shadow: 0 0 8px rgba(var(--tier-rgb), 0.35);
+  transition: box-shadow 0.2s ease, border-color 0.2s ease;
+}
+.gj-marker-icon svg {
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 0 3px rgba(var(--tier-rgb), 0.7));
+}
+
+/* 지면 도트 — 작게, 외곽 링 제거 */
+.gj-marker-base {
+  margin-top: 2px;
+  width: 4px;
+  height: 4px;
+  background: var(--tier-color);
+  border-radius: 50%;
+  box-shadow: 0 0 5px rgba(var(--tier-rgb), 0.7);
+}
+
+/* HOT — 색·글로우만 살짝 강하게 (펄스 없음) */
+.gj-marker[data-tier="hot"] .gj-marker-icon {
+  border-color: rgba(var(--tier-rgb), 0.7);
+  box-shadow: 0 0 12px rgba(var(--tier-rgb), 0.55);
+}
+
+/* SELECTED — 약간 확대 + 보더 선명 + 외곽 펄스 링 */
+.gj-marker[data-selected="true"] {
+  transform: scale(1.18);
+  z-index: 10;
+}
+.gj-marker[data-selected="true"] .gj-marker-icon {
+  border-color: var(--tier-color);
+  box-shadow:
+    0 0 14px rgba(var(--tier-rgb), 0.7),
+    inset 0 0 4px rgba(var(--tier-rgb), 0.3);
+}
+.gj-marker[data-selected="true"] .gj-marker-icon > svg {
+  filter: drop-shadow(0 0 5px rgba(var(--tier-rgb), 0.9));
+}
+
+/* 외곽 펄스 링 — selected 전용 */
+.gj-marker-icon-ring {
+  position: absolute;
+  inset: -3px;
+  border: 1px solid var(--tier-color);
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+}
+.gj-marker[data-selected="true"] .gj-marker-icon-ring {
+  animation: gj-selected-ring 1.6s ease-out infinite;
+}
+@keyframes gj-selected-ring {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(1.7); opacity: 0; }
+}
+
+/* === Locate button (GPS 레이더) === */
+.gj-locate {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 12px;
+  height: 40px;
+  background: rgba(21, 21, 31, 0.92);
+  border: 2px solid #39ff14;
+  border-radius: 5px;
+  color: #39ff14;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-weight: 700;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  white-space: nowrap;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: pointer;
+  transition: box-shadow 0.18s ease, transform 0.12s ease, border-color 0.2s, color 0.2s;
+  box-shadow:
+    0 0 12px rgba(57, 255, 20, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.5);
+}
+.gj-locate:hover {
+  box-shadow:
+    0 0 18px rgba(57, 255, 20, 0.6),
+    0 4px 14px rgba(0, 0, 0, 0.55);
+}
+.gj-locate:active { transform: translateY(1px) scale(0.97); }
+
+.gj-locate-icon {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.gj-locate-icon svg {
+  width: 20px;
+  height: 20px;
+  filter: drop-shadow(0 0 4px rgba(57, 255, 20, 0.85));
+  transition: transform 0.3s ease;
+}
+
+/* SCANNING — 회전 + 핑 */
+.gj-locate[data-state="scanning"] {
+  box-shadow:
+    0 0 22px rgba(57, 255, 20, 0.75),
+    0 0 36px rgba(57, 255, 20, 0.25),
+    0 4px 14px rgba(0, 0, 0, 0.55);
+}
+.gj-locate[data-state="scanning"] .gj-locate-icon svg {
+  animation: gj-locate-spin 1.1s linear infinite;
+}
+.gj-locate[data-state="scanning"] .gj-locate-icon::after {
+  content: "";
+  position: absolute;
+  inset: -3px;
+  border: 1px solid #39ff14;
+  border-radius: 50%;
+  opacity: 0;
+  animation: gj-locate-ping 1.1s ease-out infinite;
+}
+@keyframes gj-locate-spin {
+  from { transform: rotate(0); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes gj-locate-ping {
+  0%   { transform: scale(0.8); opacity: 0.7; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+
+/* LOCKED — 금색 한 박자 */
+.gj-locate[data-state="locked"] {
+  border-color: #ffd23f;
+  color: #ffd23f;
+  box-shadow:
+    0 0 20px rgba(255, 210, 63, 0.55),
+    0 4px 14px rgba(0, 0, 0, 0.55);
+}
+.gj-locate[data-state="locked"] .gj-locate-icon svg {
+  filter: drop-shadow(0 0 6px rgba(255, 210, 63, 0.85));
+}
+
+/* ERROR — 빨강 */
+.gj-locate[data-state="error"] {
+  border-color: #ff3864;
+  color: #ff3864;
+  box-shadow:
+    0 0 14px rgba(255, 56, 100, 0.5),
+    0 4px 14px rgba(0, 0, 0, 0.55);
+}
+.gj-locate[data-state="error"] .gj-locate-icon svg {
+  filter: drop-shadow(0 0 6px rgba(255, 56, 100, 0.85));
+}
+
+/* === Current location === */
+.gj-here {
+  position: relative;
+  width: 16px;
+  height: 16px;
+}
+.gj-here-core {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  background: #39ff14;
+  border: 2px solid #0a0a0f;
+  border-radius: 50%;
+  box-shadow: 0 0 10px rgba(57, 255, 20, 0.95);
+  z-index: 2;
+}
+.gj-here-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  background: rgba(57, 255, 20, 0.35);
+  border-radius: 50%;
+  animation: gj-pulse 1.8s ease-out infinite;
+}
+.gj-here-pulse-2 { animation-delay: 0.9s; }
+@keyframes gj-pulse {
+  0% { transform: scale(0.6); opacity: 0.85; }
+  100% { transform: scale(3.6); opacity: 0; }
+}
+
+/* LOCKED 시 1회만 큰 레이더 펄스 */
+.gj-here[data-burst="true"]::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid #39ff14;
+  border-radius: 50%;
+  animation: gj-here-burst 1.2s ease-out forwards;
+}
+@keyframes gj-here-burst {
+  0%   { transform: scale(0.6); opacity: 1; }
+  100% { transform: scale(6);   opacity: 0; }
+}
+
+/* === Sheet slide animations === */
+@keyframes gj-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+@keyframes gj-slide-down {
+  from { transform: translateY(-12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* === CRT scanlines (랭킹/스테이지 카드 배경) === */
+.arcade-scanlines::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.035) 0 1px,
+    transparent 1px 3px
+  );
+  pointer-events: none;
+  z-index: 0;
+  mix-blend-mode: overlay;
+}
+.arcade-scanlines > * { position: relative; z-index: 1; }
+
+/* === Phosphor glow === */
+.arcade-glow-gold {
+  text-shadow:
+    0 0 4px rgba(255, 210, 63, 0.85),
+    0 0 12px rgba(255, 210, 63, 0.55),
+    0 0 24px rgba(255, 210, 63, 0.3);
+  animation: arcade-glow-pulse 2.4s ease-in-out infinite;
+}
+.arcade-glow-neon {
+  text-shadow:
+    0 0 4px rgba(57, 255, 20, 0.85),
+    0 0 12px rgba(57, 255, 20, 0.5),
+    0 0 24px rgba(57, 255, 20, 0.25);
+}
+@keyframes arcade-glow-pulse {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.18); }
+}
+
+/* === Blinking cursor / NEW! 태그 === */
+.arcade-blink {
+  animation: arcade-blink 1s steps(2) infinite;
+}
+@keyframes arcade-blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
