@@ -18,7 +18,7 @@ export default async function LocationsPage() {
     <div className="arcade-fade-in px-4 py-4">
       <div className="mb-3 flex items-center justify-between">
         <h1 className="arcade-title font-display text-2xl leading-none text-arcade-accent">
-          STAGE SELECT
+          주변 철봉
         </h1>
         <AddLocationButton />
       </div>
@@ -33,7 +33,7 @@ export default async function LocationsPage() {
         <div className="rounded border border-arcade-border bg-arcade-panel p-6 text-center text-sm text-zinc-400">
           아직 등록된 철봉이 없어요.
           <br />
-          첫 스테이지를 만들어 보세요.
+          첫 장소를 추가해 보세요.
         </div>
       ) : (
         <ul className="space-y-2">
@@ -51,7 +51,7 @@ export default async function LocationsPage() {
                     )}
                   </div>
                   <div className="shrink-0 text-[10px] tracking-[0.2em] text-arcade-accent">
-                    ▶ PLAY
+                    ▶ 보기
                   </div>
                 </div>
                 {loc.description && (

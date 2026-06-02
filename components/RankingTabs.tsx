@@ -76,7 +76,7 @@ export default function RankingTabs({ records, activeType }: Props) {
 
         {top3.length === 0 ? (
           <div className="px-3 py-7 text-center text-[11px] text-zinc-500">
-            첫 도전자가 되어보세요
+            아직 남은 기록이 없다
           </div>
         ) : (
           <ol>
@@ -116,8 +116,8 @@ export default function RankingTabs({ records, activeType }: Props) {
       {rest.length > 0 && (
         <div>
           <header className="mb-1.5 flex items-center justify-between px-1">
-            <span className="arcade-label-wide">RANKING</span>
-            <span className="arcade-label-wide">{rest.length}명</span>
+            <span className="arcade-label-wide">HISTORY</span>
+            <span className="arcade-label-wide">{rest.length}건</span>
           </header>
           <ol>
             {rest.map((r, idx) => (
