@@ -1,5 +1,5 @@
 /**
- * 공스장 카피 라이브러리
+ * LOGOUT 카피 라이브러리 (Legacy — 도장깨기 톤, 현재 미사용)
  *
  * 톤: 인디게임 / 레트로 아케이드 / 스트릿 / 은둔고수
  * 원칙:
@@ -183,7 +183,7 @@ export const COPY = {
     "동네 철봉 도장깨기",
     "은둔고수의 기록을 깨라",
     "현실의 도장깨기",
-    "INSERT COIN · 공스장",
+    "INSERT COIN · LOGOUT",
     "거리에 흔적을 남겨라",
     "이름을 새겨라",
     "STREET RANKING",
@@ -191,10 +191,10 @@ export const COPY = {
 
   // === 브랜드 ===
   brand: {
-    kr: "공스장",
-    en: "GONGSJANG",
-    tagline: "동네 철봉 도장깨기",
-    full: "공스장 — 동네 철봉 도장깨기",
+    kr: "로그아웃",
+    en: "LOGOUT",
+    tagline: "로그아웃하고, 밖으로",
+    full: "LOGOUT — 로그아웃하고, 밖으로",
   },
 
   // === NEW! 같은 짧은 배지 ===

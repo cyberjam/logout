@@ -9,7 +9,7 @@ import {
   type RecordType,
 } from "@/lib/types";
 
-const NICKNAME_KEY = "gongsjang_nickname";
+const NICKNAME_KEY = "logout_nickname";
 
 export default function RecordForm({ locationId }: { locationId: string }) {
   const router = useRouter();

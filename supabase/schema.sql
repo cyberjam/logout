@@ -1,4 +1,4 @@
--- 공스장 MVP 스키마
+-- LOGOUT — DB 스키마 (Legacy locations/records + LOGOUT visits)
 -- Supabase SQL Editor에서 그대로 실행
 
 create extension if not exists "pgcrypto";

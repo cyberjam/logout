@@ -6,7 +6,7 @@ import { createSupabaseBrowserClient } from "@/lib/supabase/client";
 import { ensureAnonSession } from "@/lib/auth";
 
 // Legacy 기록 폼과 닉네임 공유 (방문에 표시용 — 선택)
-const NICKNAME_KEY = "gongsjang_nickname";
+const NICKNAME_KEY = "logout_nickname";
 
 type Phase = "idle" | "locating" | "checking" | "done" | "error";
 

@@ -9,7 +9,7 @@
    ```bash
    git init && git add -A && git commit -m "init: LOGOUT 스타터"
    git branch -M main
-   git remote add origin git@github.com:<you>/logout.git
+   git remote add origin https://github.com/cyberjam/logout.git
    git push -u origin main
    ```
 

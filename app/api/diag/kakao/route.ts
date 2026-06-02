@@ -46,7 +46,6 @@ export async function GET(req: Request) {
   const probes = await Promise.all([
     probe(undefined, key),
     probe(origin + "/", key),
-    probe("https://gongsjang.vercel.app/", key),
     probe("http://localhost:3000/", key),
   ]);
 
@@ -94,7 +93,7 @@ export async function GET(req: Request) {
 </style>
 </head>
 <body>
-<h1>공스장 / Kakao SDK 진단</h1>
+<h1>LOGOUT / Kakao SDK 진단</h1>
 
 <div class="verdict ${anyOk ? "ok" : "bad"}">${escapeHtml(verdict)}</div>
 
@@ -118,7 +117,7 @@ export async function GET(req: Request) {
 
 <div class="panel" style="margin-top:12px;font-size:11px;color:#888">
   <b style="color:#ffd23f">읽는 법</b><br/>
-  ① Referer=<code>https://gongsjang.vercel.app/</code> 행이 <b style="color:#39ff14">200 OK</b>이면 Kakao 등록 OK. 이 경우 코드 쪽 문제.<br/>
+  ① <code>서버 origin</code> 행이 <b style="color:#39ff14">200 OK</b>이면 Kakao 등록 OK. 이 경우 코드 쪽 문제.<br/>
   ② 그 행이 <b style="color:#ff3864">401/403</b>이면 Kakao 도메인 화이트리스트에 실제로 저장 안 됨. Kakao Developers에서 다시 등록 + 저장 버튼.<br/>
   ③ 모든 행이 401 → 키 자체가 무효. 재발급 필요.
 </div>
