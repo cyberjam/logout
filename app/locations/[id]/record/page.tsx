@@ -28,10 +28,10 @@ export default async function RecordPage({ params }: { params: { id: string } })
       </Link>
 
       <h1 className="arcade-title font-display mt-2 text-2xl leading-none text-arcade-accent">
-        ENTER YOUR SCORE
+        오늘 기록 남기기
       </h1>
       <p className="mb-4 text-[11px] text-zinc-400">
-        오락실 점수판처럼, 닉네임과 기록만 남기면 끝.
+        닉네임과 오늘 한 걸음을 남기면 끝. 이 날이 streak 에 더해진다.
       </p>
 
       <RecordForm locationId={loc.id} />

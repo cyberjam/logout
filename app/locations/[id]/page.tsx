@@ -50,7 +50,7 @@ export default async function LocationDetailPage({
       <header className="space-y-1.5">
         <div className="flex items-baseline gap-2">
           <span className="arcade-chip border-arcade-border text-zinc-400">
-            STAGE
+            장소
           </span>
           <h1 className="font-display min-w-0 flex-1 truncate text-2xl leading-none text-arcade-accent">
             {loc.name}
@@ -63,7 +63,7 @@ export default async function LocationDetailPage({
               <span className="text-zinc-700">·</span>
             </>
           )}
-          <span>도전자 {totalChallenges}명</span>
+          <span>다녀간 기록 {totalChallenges}회</span>
         </div>
         {loc.description && (
           <p className="pt-1 text-[11px] leading-relaxed text-zinc-500">
@@ -72,25 +72,33 @@ export default async function LocationDetailPage({
         )}
       </header>
 
-      {/* 2. TOP3 + 3. 전체 랭킹 */}
-      <RankingTabs
-        locationId={loc.id}
-        records={records}
-        activeType={activeType}
-      />
-
-      {/* 4. 기록 등록 버튼 */}
+      {/* 메인 액션 — 오늘 여기 다녀간 기록 남기기 */}
       <Link
         href={`/locations/${loc.id}/record`}
         className="block w-full rounded border border-arcade-accent bg-arcade-accent py-3 text-center text-arcade-bg transition active:translate-y-px hover:brightness-95"
       >
         <span className="font-display block text-lg leading-none tracking-[0.18em]">
-          ▶ NEW CHALLENGER
+          ▶ 여기 기록하기
         </span>
         <span className="mt-1 block text-[10px] tracking-arcade opacity-80">
-          기록 등록하기
+          오늘 다녀간 흔적을 남긴다
         </span>
       </Link>
+
+      {/* 기록 보관함 (LEGACY) — 메인 경험 아님, 보조 정보 */}
+      <section className="space-y-2 border-t border-arcade-border/60 pt-4">
+        <div className="flex items-center gap-2">
+          <span className="arcade-chip border-arcade-border text-zinc-500">
+            LEGACY
+          </span>
+          <span className="arcade-label-wide">이 장소에 남은 기록</span>
+        </div>
+        <RankingTabs
+          locationId={loc.id}
+          records={records}
+          activeType={activeType}
+        />
+      </section>
     </div>
   );
 }

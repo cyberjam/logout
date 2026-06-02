@@ -131,7 +131,7 @@ export default function RecordForm({ locationId }: { locationId: string }) {
         disabled={loading}
         className="arcade-btn-primary font-display w-full py-3 text-lg leading-none tracking-[0.18em]"
       >
-        {loading ? "등록 중..." : "▶ SUBMIT SCORE"}
+        {loading ? "기록 중..." : "▶ 오늘 기록하기"}
       </button>
     </form>
   );

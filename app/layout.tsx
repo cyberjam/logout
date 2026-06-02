@@ -12,16 +12,16 @@ const fontDisplay = VT323({
 
 export const metadata: Metadata = {
   title: {
-    default: "공스장 — 동네 철봉 도장깨기",
-    template: "%s · 공스장",
+    default: "LOGOUT — 로그아웃하고, 밖으로",
+    template: "%s · LOGOUT",
   },
   description:
-    "공스장 — 우리 동네 철봉에서 은둔고수의 기록을 깨라. GPS 기반 현실 도장깨기.",
-  applicationName: "공스장",
+    "LOGOUT — 화면을 닫고 밖으로. 운동 횟수가 아니라, 밖으로 나간 날을 센다.",
+  applicationName: "LOGOUT",
   openGraph: {
-    title: "공스장 — 동네 철봉 도장깨기",
-    description: "동네 철봉 위에 새겨진 전설을 깨러 가자.",
-    siteName: "공스장",
+    title: "LOGOUT — 로그아웃하고, 밖으로",
+    description: "오늘 한 번 더 밖으로. 나간 날을 잇는다.",
+    siteName: "LOGOUT",
     locale: "ko_KR",
     type: "website",
   },
@@ -43,30 +43,31 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="flex items-center justify-between px-4 py-3">
               <Link
                 href="/"
-                aria-label="공스장 — 동네 철봉 도장깨기"
+                aria-label="LOGOUT — 로그아웃하고, 밖으로"
                 className="group inline-flex items-baseline gap-2"
               >
-                <span className="arcade-title text-xl font-black text-arcade-accent">
-                  공스장
+                <span className="arcade-title font-display text-2xl leading-none text-arcade-accent">
+                  LOGOUT
                 </span>
-                <span className="font-display text-base leading-none tracking-[0.1em] text-zinc-500 group-hover:text-arcade-accent">
-                  GONGSJANG
+                <span className="text-[10px] leading-none tracking-[0.1em] text-zinc-500 group-hover:text-arcade-accent">
+                  밖으로
                 </span>
               </Link>
               <nav className="flex gap-3 text-xs tracking-arcade">
                 <Link href="/" className="hover:text-arcade-accent">지도</Link>
-                <Link href="/locations" className="hover:text-arcade-accent">목록</Link>
+                <Link href="/me" className="hover:text-arcade-accent">내 상태</Link>
+                <Link href="/locations" className="hover:text-arcade-accent">장소</Link>
               </nav>
             </div>
             <div className="border-t border-arcade-border/60 px-4 py-1 text-[9px] tracking-arcade-wide text-zinc-500">
-              동네 철봉 도장깨기 · 은둔고수의 기록을 깨라
+              로그아웃하고, 밖으로 · 나간 날을 센다
             </div>
           </header>
 
           <main className="flex-1">{children}</main>
 
           <footer className="border-t border-arcade-border px-4 py-4 text-center text-[10px] tracking-arcade text-zinc-500">
-            INSERT COIN · 공스장
+            LOG OUT · 밖으로
           </footer>
         </div>
       </body>

@@ -14,7 +14,7 @@ export default async function HomePage() {
         .order("created_at", { ascending: false }),
       supabase
         .from("records")
-        .select("location_id, record_type, value, nickname"),
+        .select("location_id, record_type, value, nickname, created_at"),
       supabase.from("locations").select("*", { count: "exact", head: true }),
     ]);
 
@@ -48,5 +48,16 @@ export default async function HomePage() {
     };
   });
 
-  return <KakaoMap locations={enriched} stagesCount={stagesCount ?? enriched.length} />;
+  // TODAY HUD용 — 닉네임별 방문 신호 (클라이언트에서 내 것만 필터)
+  const visits: { nickname: string; created_at: string }[] = (records ?? []).map(
+    (r: any) => ({ nickname: r.nickname, created_at: r.created_at }),
+  );
+
+  return (
+    <KakaoMap
+      locations={enriched}
+      stagesCount={stagesCount ?? enriched.length}
+      visits={visits}
+    />
+  );
 }

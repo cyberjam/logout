@@ -1,8 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { LocationWithStats } from "@/lib/types";
+import { computeVisitStats } from "@/lib/streak";
+
+const NICKNAME_KEY = "gongsjang_nickname";
 
 declare global {
   interface Window {
@@ -127,11 +130,27 @@ type MarkerOverlayEntry = {
 export default function KakaoMap({
   locations,
   stagesCount,
+  visits = [],
 }: {
   locations: LocationWithStats[];
   stagesCount?: number;
+  visits?: { nickname: string; created_at: string }[];
 }) {
   const router = useRouter();
+  const [myNickname, setMyNickname] = useState<string | null>(null);
+
+  // 내 닉네임 (localStorage) — TODAY HUD용
+  useEffect(() => {
+    setMyNickname(localStorage.getItem(NICKNAME_KEY));
+  }, []);
+
+  const myStats = useMemo(() => {
+    if (!myNickname) return null;
+    const mine = visits
+      .filter((v) => v.nickname === myNickname)
+      .map((v) => v.created_at);
+    return computeVisitStats(mine);
+  }, [myNickname, visits]);
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const myPosRef = useRef<{ lat: number; lng: number } | null>(null);
@@ -427,7 +446,6 @@ export default function KakaoMap({
     );
   }
 
-  const totalChallenges = locations.reduce((a, l) => a + l.recordCount, 0);
   const distance =
     selected && myPosRef.current
       ? distanceKm(myPosRef.current, { lat: selected.lat, lng: selected.lng })
@@ -459,22 +477,7 @@ export default function KakaoMap({
             onClose={() => setSelected(null)}
           />
         ) : (
-          <div className="pointer-events-auto grid grid-cols-2 gap-2">
-            <div className="arcade-card bg-arcade-panel/85 px-3 py-1.5 backdrop-blur">
-              <div className="arcade-label">STAGES</div>
-              <div className="font-display flex items-baseline whitespace-nowrap leading-none text-arcade-accent tabular-nums [font-size:clamp(0.95rem,5vw,1.25rem)] tracking-tight">
-                {(stagesCount ?? locations.length).toLocaleString("ko-KR")}
-                <span className="ml-1 text-[10px] text-zinc-400">곳</span>
-              </div>
-            </div>
-            <div className="arcade-card bg-arcade-panel/85 px-3 py-1.5 backdrop-blur">
-              <div className="arcade-label">CHALLENGES</div>
-              <div className="font-display text-xl leading-none text-arcade-neon tabular-nums">
-                {totalChallenges}
-                <span className="ml-1 text-[10px] text-zinc-400">회</span>
-              </div>
-            </div>
-          </div>
+          <TodayHud stats={myStats} stagesCount={stagesCount ?? locations.length} />
         )}
       </div>
 
@@ -496,7 +499,7 @@ export default function KakaoMap({
       {!selected && mapReady && (
         <div className="pointer-events-none absolute inset-x-3 bottom-3 z-20">
           <div className="arcade-card bg-arcade-panel/80 px-3 py-2 text-center text-[11px] tracking-arcade text-zinc-400 backdrop-blur">
-            ▼ 마커를 눌러 STAGE INFO 열기
+            ▼ 가까운 철봉을 눌러 자세히
           </div>
         </div>
       )}
@@ -510,6 +513,61 @@ export default function KakaoMap({
           onChallenge={() => router.push(`/locations/${selected.id}`)}
         />
       )}
+    </div>
+  );
+}
+
+function TodayHud({
+  stats,
+  stagesCount,
+}: {
+  stats: ReturnType<typeof computeVisitStats> | null;
+  stagesCount: number;
+}) {
+  const done = stats?.visitedToday ?? false;
+  return (
+    <div className="pointer-events-auto arcade-card bg-arcade-panel/85 px-3 py-2 backdrop-blur">
+      <div className="flex items-center justify-between gap-2">
+        {/* 1. 오늘 방문 여부 */}
+        <div className="flex items-center gap-2">
+          <span
+            className={`inline-block h-2.5 w-2.5 rounded-full ${
+              done
+                ? "bg-arcade-neon shadow-[0_0_8px_rgba(57,255,20,0.8)]"
+                : "border border-arcade-border bg-transparent"
+            }`}
+            aria-hidden="true"
+          />
+          <div className="leading-tight">
+            <div className="arcade-label">TODAY</div>
+            <div
+              className={`text-[12px] font-bold tracking-arcade ${
+                done ? "text-arcade-neon" : "text-zinc-400"
+              }`}
+            >
+              {done ? "오늘 나갔다" : "아직 안 나감"}
+            </div>
+          </div>
+        </div>
+        {/* 2. 현재 streak · 3. 총 방문 */}
+        <div className="flex items-stretch gap-3 text-right">
+          <div>
+            <div className="arcade-label">STREAK</div>
+            <div className="font-display text-lg leading-none text-arcade-accent tabular-nums">
+              {stats?.currentStreak ?? 0}
+              <span className="ml-0.5 text-[9px] text-zinc-400">일</span>
+            </div>
+          </div>
+          <div className="w-px bg-arcade-border" />
+          <div>
+            <div className="arcade-label">총 방문</div>
+            <div className="font-display text-lg leading-none text-zinc-200 tabular-nums">
+              {stats?.totalVisits ?? 0}
+              <span className="ml-0.5 text-[9px] text-zinc-400">일</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -536,7 +594,7 @@ function SelectedHeader({
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-1.5">
               <span className="arcade-chip border-arcade-accent text-arcade-accent">
-                STAGE
+                장소
               </span>
               {location.recordCount === 0 && (
                 <span className="arcade-chip border-arcade-neon text-arcade-neon">
@@ -555,9 +613,9 @@ function SelectedHeader({
           </div>
           {location.recordCount > 0 && (
             <div className="shrink-0 text-right">
-              <div className="arcade-label">SCORE</div>
+              <div className="arcade-label">방문</div>
               <div className={`text-base font-bold ${tierClass.split(" ")[1]}`}>
-                ★{location.recordCount}
+                {location.recordCount}
               </div>
             </div>
           )}
@@ -586,7 +644,7 @@ function StageSheet({
   onChallenge: () => void;
 }) {
   const tier = tierOf(location.recordCount);
-  const tierLabel = tier === "hot" ? "HOT" : tier === "active" ? "ACTIVE" : "NEW";
+  const tierLabel = tier === "hot" ? "BUSY" : tier === "active" ? "ACTIVE" : "NEW";
   const tierClass =
     tier === "hot"
       ? "border-arcade-danger text-arcade-danger"
@@ -602,33 +660,17 @@ function StageSheet({
         <div className="mb-3 flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <span className={`arcade-chip ${tierClass}`}>{tierLabel}</span>
-            <span className="arcade-label-wide">STAGE INFO</span>
+            <span className="arcade-label-wide">이 장소</span>
           </div>
           <span className="arcade-label">지도 탭 ▸ 닫기</span>
         </div>
 
-        <div className="mb-3 grid grid-cols-3 gap-2">
+        <div className="mb-3 grid grid-cols-2 gap-2">
           <div className="arcade-stat p-2">
-            <div className="arcade-label">HIGH SCORE</div>
-            {location.topPullup ? (
-              <>
-                <div className="font-display text-lg leading-none text-arcade-accent tabular-nums">
-                  {location.topPullup.value}
-                  <span className="ml-0.5 text-[9px] text-zinc-400">회</span>
-                </div>
-                <div className="truncate text-[9px] text-zinc-500">
-                  {location.topPullup.nickname}
-                </div>
-              </>
-            ) : (
-              <div className="font-display text-lg leading-none text-zinc-600">---</div>
-            )}
-          </div>
-          <div className="arcade-stat p-2">
-            <div className="arcade-label">CHALLENGERS</div>
+            <div className="arcade-label">다녀간 기록</div>
             <div className="font-display text-lg leading-none text-arcade-neon tabular-nums">
               {location.recordCount}
-              <span className="ml-0.5 text-[9px] text-zinc-400">명</span>
+              <span className="ml-0.5 text-[9px] text-zinc-400">회</span>
             </div>
           </div>
           <div className="arcade-stat p-2">
@@ -647,7 +689,7 @@ function StageSheet({
           onClick={onChallenge}
           className="arcade-btn-primary font-display w-full py-3 text-lg leading-none tracking-[0.18em]"
         >
-          ▶ ENTER STAGE
+          ▶ 여기 기록하기
         </button>
       </div>
     </div>
