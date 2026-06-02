@@ -56,6 +56,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               <nav className="flex gap-3 text-xs tracking-arcade">
                 <Link href="/" className="hover:text-arcade-accent">지도</Link>
                 <Link href="/locations" className="hover:text-arcade-accent">목록</Link>
+                <Link href="/me" className="hover:text-arcade-accent">내 기록</Link>
               </nav>
             </div>
             <div className="border-t border-arcade-border/60 px-4 py-1 text-[9px] tracking-arcade-wide text-zinc-500">

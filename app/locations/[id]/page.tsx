@@ -4,6 +4,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 import type { Location, RecordRow, RecordType } from "@/lib/types";
 import { RECORD_TYPES } from "@/lib/types";
 import RankingTabs from "@/components/RankingTabs";
+import CheckInButton from "@/components/CheckInButton";
 
 export const dynamic = "force-dynamic";
 
@@ -72,23 +73,33 @@ export default async function LocationDetailPage({
         )}
       </header>
 
-      {/* 2. TOP3 + 3. 전체 랭킹 */}
+      {/* 2. LOGOUT 핵심 루프 — GPS 방문 인증 (메인 액션) */}
+      <CheckInButton locationId={loc.id} name={loc.name} />
+
+      {/* ── 아래는 Legacy(기록 랭킹) — 유지하되 신규 개발 중단 ── */}
+      <div className="flex items-center gap-2 pt-1">
+        <span className="arcade-chip border-arcade-border text-zinc-500">LEGACY</span>
+        <span className="arcade-label-wide">기록 랭킹</span>
+        <span className="h-px flex-1 bg-arcade-border/40" />
+      </div>
+
+      {/* TOP3 + 전체 랭킹 (Legacy) */}
       <RankingTabs
         locationId={loc.id}
         records={records}
         activeType={activeType}
       />
 
-      {/* 4. 기록 등록 버튼 */}
+      {/* 기록(reps) 등록 — Legacy, 메인 대비 약하게 */}
       <Link
         href={`/locations/${loc.id}/record`}
-        className="block w-full rounded border border-arcade-accent bg-arcade-accent py-3 text-center text-arcade-bg transition active:translate-y-px hover:brightness-95"
+        className="block w-full rounded border border-arcade-border bg-arcade-panel py-3 text-center text-zinc-300 transition active:translate-y-px hover:border-arcade-accent hover:text-arcade-accent"
       >
-        <span className="font-display block text-lg leading-none tracking-[0.18em]">
-          ▶ NEW CHALLENGER
+        <span className="font-display block text-base leading-none tracking-[0.18em]">
+          기록 등록 (reps)
         </span>
-        <span className="mt-1 block text-[10px] tracking-arcade opacity-80">
-          기록 등록하기
+        <span className="mt-1 block text-[10px] tracking-arcade text-zinc-500">
+          LEGACY · 랭킹 경쟁
         </span>
       </Link>
     </div>

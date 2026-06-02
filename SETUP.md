@@ -42,6 +42,16 @@ npm run dev
 - `gongsjang` 의 `lib/copy.ts` 카피 라이브러리는 포함됨. 추가 카피 필요 시 거기서 가져오기.
 - 시드(전국 철봉 데이터) 가 필요하면 `gongsjang` 의 `scripts/` 파이프라인으로 **gongsjang 쪽에서** 채우고 같은 DB 를 공유하면 됨(LOGOUT 에 시드 코드 복제 불필요).
 
+## 7. LOGOUT 핵심 루프 (방문·streak) 활성화 ⚙️
+방문 인증 → streak → `/me` 가 동작하려면 두 가지가 필요하다.
+
+1. **스키마 적용**: `supabase/schema.sql` 을 SQL Editor 에서 실행
+   - Legacy `locations`/`records` + LOGOUT `visits` 테이블, `record_visit()` / `my_streak()` 함수가 생성된다.
+2. **익명 인증 활성화 ⚙️**: Supabase → **Authentication → Sign In / Providers → Anonymous sign-ins** 켜기
+   - 식별자(`auth.uid()`)가 있어야 출석/streak 집계가 된다. 로그인 UI 없이 자동 생성.
+3. (확인) 방문 인증은 철봉 **100m 반경**에서만 성공한다(서버 거리 검증). 테스트 시 좌표가 가까운지 확인.
+
 ## 포함 / 제외
-- 포함: 홈(지도)·기록·랭킹·CRT UI·QR(`/qr`)·상태(`/me`) 골격
+- 포함: 홈(지도)·**GPS 방문 인증(CHECK-IN)**·**streak/`me` 실데이터**·CRT UI
+- Legacy(유지, 신규개발 중단): 기록(reps)·랭킹·`/qr` 골격
 - 제외: faction/점령/게임 엔진, 시드 스크립트, 엔진용 테스트/메모

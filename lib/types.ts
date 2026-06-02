@@ -45,3 +45,16 @@ export type RecordRow = {
   memo: string | null;
   created_at: string;
 };
+
+// LOGOUT 핵심 루프 — 방문 기록
+export type Visit = {
+  id: string;
+  user_id: string;
+  location_id: string;
+  nickname: string | null;
+  lat: number | null;
+  lng: number | null;
+  distance_m: number | null;
+  visit_date: string;
+  created_at: string;
+};

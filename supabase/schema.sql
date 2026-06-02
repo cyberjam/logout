@@ -93,3 +93,136 @@ language sql stable as $$
     power(sin(radians((lng - in_lng) / 2)), 2)
   )) <= in_meters;
 $$;
+
+-- ─────────────────────────────────────────────────────────────
+-- LOGOUT 핵심 루프 — 방문(visit) · 출석(streak)
+--   · 식별: Supabase 익명 인증 (auth.uid())
+--   · 인증: GPS 반경 — record_visit() 가 서버에서 거리 검증
+--   · 기록(records)/랭킹은 Legacy — 그대로 유지, 신규 개발 중단
+-- ─────────────────────────────────────────────────────────────
+
+-- 방문 기록 (streak 은 "밖에 나간 날"의 연속으로 계산)
+create table if not exists visits (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  location_id uuid not null references locations(id) on delete cascade,
+  nickname text,
+  lat double precision,
+  lng double precision,
+  distance_m double precision,           -- 인증 시점 철봉과의 거리(검증 기록)
+  visit_date date not null default (now() at time zone 'Asia/Seoul')::date,
+  created_at timestamptz not null default now()
+);
+
+-- 같은 사람 · 같은 장소 · 하루 1회 (중복 탭 방지 + 멱등)
+create unique index if not exists visits_user_loc_day_uniq
+  on visits (user_id, location_id, visit_date);
+create index if not exists visits_user_date_idx
+  on visits (user_id, visit_date desc);
+
+alter table visits enable row level security;
+
+-- 본인 방문만 조회 (streak 계산용; 타인 방문은 노출 불필요)
+drop policy if exists "users read own visits" on visits;
+create policy "users read own visits"
+  on visits for select using (auth.uid() = user_id);
+-- 직접 insert 정책 없음 → record_visit()(SECURITY DEFINER)로만 기록 = 거리 검증 강제
+
+-- 방문 인증: 서버에서 Haversine 거리 검증 후 기록 (반경 밖이면 거부)
+create or replace function record_visit(
+  in_location_id uuid,
+  in_lat double precision,
+  in_lng double precision,
+  in_nickname text default null,
+  in_radius_m double precision default 100
+)
+returns visits
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_uid  uuid := auth.uid();
+  v_loc  locations;
+  v_dist double precision;
+  v_row  visits;
+begin
+  if v_uid is null then
+    raise exception 'AUTH_REQUIRED';
+  end if;
+
+  select * into v_loc from locations where id = in_location_id;
+  if not found then
+    raise exception 'LOCATION_NOT_FOUND';
+  end if;
+
+  v_dist := 6371000 * 2 * asin(sqrt(
+    power(sin(radians((v_loc.lat - in_lat) / 2)), 2) +
+    cos(radians(in_lat)) * cos(radians(v_loc.lat)) *
+    power(sin(radians((v_loc.lng - in_lng) / 2)), 2)
+  ));
+
+  if v_dist > in_radius_m then
+    raise exception 'TOO_FAR:%', round(v_dist)::int;
+  end if;
+
+  insert into visits (user_id, location_id, nickname, lat, lng, distance_m)
+  values (v_uid, in_location_id, in_nickname, in_lat, in_lng, v_dist)
+  on conflict (user_id, location_id, visit_date) do update
+    set lat = excluded.lat,
+        lng = excluded.lng,
+        distance_m = excluded.distance_m,
+        nickname = coalesce(excluded.nickname, visits.nickname)
+  returning * into v_row;
+
+  return v_row;
+end;
+$$;
+
+-- 내 출석 통계 — 연속 출석(streak) · 총 방문 · 오늘 방문 여부
+create or replace function my_streak()
+returns table (
+  current_streak  int,
+  longest_streak  int,
+  total_visits    bigint,
+  distinct_days   bigint,
+  today_visited   boolean,
+  last_visit_date date
+)
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  with v as (
+    select * from visits where user_id = auth.uid()
+  ),
+  days as (
+    select distinct visit_date as d from v
+  ),
+  ordered as (
+    select d, row_number() over (order by d)::int as rn from days
+  ),
+  -- gaps-and-islands: 연속된 날짜는 (d - rn) 이 같은 값으로 묶인다
+  islands as (
+    select (d - rn) as grp, count(*)::int as len, max(d) as end_d
+    from ordered
+    group by (d - rn)
+  ),
+  t as (select (now() at time zone 'Asia/Seoul')::date as today)
+  select
+    coalesce((
+      select i.len from islands i, t
+      where i.end_d >= t.today - 1            -- 오늘 또는 어제까지 이어진 것만 "현재"
+      order by i.end_d desc limit 1
+    ), 0)                                                    as current_streak,
+    coalesce((select max(len) from islands), 0)             as longest_streak,
+    (select count(*) from v)                                as total_visits,
+    (select count(*) from days)                             as distinct_days,
+    (select exists(select 1 from days, t where d = t.today)) as today_visited,
+    (select max(d) from days)                               as last_visit_date;
+$$;
+
+grant execute on function record_visit(uuid, double precision, double precision, text, double precision)
+  to anon, authenticated;
+grant execute on function my_streak() to anon, authenticated;
